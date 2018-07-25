@@ -99,4 +99,89 @@ app.post('/', upload.single('file'), function createRestaurant(req, res, next){
         })
 });
 
+/**
+ * @api {put} /restaurants/:id Update a restaurant given unique restaurant id 
+ * @apiName: updateRestaurant
+ * @apiDescription: Update a restaurant
+ * @apiGroup Restaurants
+ * 
+ * @apiParam (Request body) {File} file File to upload using HTML forms.
+ * @apiParam (Request body) {String} name Restaurant name.
+ * @apiParam (Request body) {String} address Restaurant address.
+ * @apiParam (Request body) {String} region Region the restaurant belongs to.
+ * 
+ * @apiSuccessExample {json} Success response: object with the IDs of the created restaurant and profile picture
+ * 
+ * @apiError (errorGroup) 400 Bad Request: field(s) missing.
+ * @apiError (errorGroup) 415 Unsupported Media Type.
+ * @apiError (errorGroup) 500 Internal Server Error: operation failed due to server error.
+ */
+app.put('/:id', upload.single('file'), function updateRestaurant(req, res) {
+    let restaurant = {
+        name: req.body.name || null,
+        address: req.body.address || null,
+        regionId: parseInt(req.body.region) || null,
+    };
+    if (!req.body.name || !req.body.address || !req.body.region) {
+        res.sendStatus(400);
+        return;
+    }
+    let storePicPromise;
+    if (req.file) {
+        // check file type
+        if(!allowedImageTypes.includes(req.file.mimetype)) {
+            res.sendStatus(415);
+            fs.unlink(req.file.path, err => {
+                if (err) throw err;
+            });
+            return;
+        }
+        storePicPromise = hasha.fromFile(req.file.path, {algorithm: 'md5'})
+            .then((hash) => {
+                // check if there exist the same file
+                return imageModel.findById(hash)
+                .then(img => {
+                    if (!img) {
+                        fs.rename(req.file.path, req.file.destination + "/" + hash, err => {
+                            if (err) throw err;
+                        })
+                    } else {
+                        fs.unlink(req.file.path, err => {
+                            if (err) throw err;
+                        });
+                    }
+                    return imageModel.upsert({
+                        id: hash,
+                        name: req.file.originalname,
+                    }).then(() => {
+                        return hash;
+                    });
+                });
+            })
+    } else {
+        storePicPromise = Promise.resolve();
+    }
+
+    storePicPromise
+        .then((image) => {
+            restaurantModel.findById(req.params.id)
+                .then((oldRestaurant) => {
+                    return oldRestaurant.update({
+                        name: restaurant.name,
+                        address: restaurant.address,
+                        regionId: restaurant.regionId,
+                        profilePic: image || oldRestaurant.profilePic,
+                    }).then(() => {
+                        res.send({
+                            id: req.params.id,
+                            profilePic: image || oldRestaurant.profilePic,
+                        });
+                    });
+                })
+        })
+        .catch((err) => {
+            console.log('Error updating restaurant: ', err);
+        });
+})
+
 module.exports = app;
