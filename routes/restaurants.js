@@ -11,7 +11,7 @@ const hasha = require('hasha');
 
 const multer = require('multer');
 const upload = multer({
-    dest: 'public/images'
+    dest: 'public/images',
 });
 const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
@@ -20,19 +20,19 @@ const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
  * @apiName: createRestaurant
  * @apiDescription: post a new restaurant
  * @apiGroup Restaurants
- * 
+ *
  * @apiParam (Request body) {File} file File to upload using HTML forms.
  * @apiParam (Request body) {String} name Restaurant name.
  * @apiParam (Request body) {String} address Restaurant address.
  * @apiParam (Request body) {String} region Region the restaurant belongs to.
- * 
+ *
  * @apiSuccessExample {json} Success response: object with the IDs of the created restaurant and profile picture
- * 
+ *
  * @apiError (errorGroup) 400 Bad Request: field(s) missing.
  * @apiError (errorGroup) 415 Unsupported Media Type.
  * @apiError (errorGroup) 500 Internal Server Error: operation failed due to server error.
  */
-app.post('/', upload.single('file'), function createRestaurant(req, res, next){
+app.post('/', upload.single('file'), function createRestaurant(req, res, next) {
     let restaurant = {
         name: req.body.name || null,
         address: req.body.address || null,
@@ -45,9 +45,9 @@ app.post('/', upload.single('file'), function createRestaurant(req, res, next){
     let storePicPromise;
     if (req.file) {
         // check file type
-        if(!allowedImageTypes.includes(req.file.mimetype)) {
+        if (!allowedImageTypes.includes(req.file.mimetype)) {
             res.sendStatus(415);
-            fs.unlink(req.file.path, err => {
+            fs.unlink(req.file.path, (err) => {
                 if (err) throw err;
             });
             return;
@@ -56,13 +56,13 @@ app.post('/', upload.single('file'), function createRestaurant(req, res, next){
             .then((hash) => {
                 // check if there exist the same file
                 return imageModel.findById(hash)
-                .then(img => {
+                .then((img) => {
                     if (!img) {
-                        fs.rename(req.file.path, req.file.destination + "/" + hash, err => {
+                        fs.rename(req.file.path, req.file.destination + '/' + hash, (err) => {
                             if (err) throw err;
-                        })
+                        });
                     } else {
-                        fs.unlink(req.file.path, err => {
+                        fs.unlink(req.file.path, (err) => {
                             if (err) throw err;
                         });
                     }
@@ -73,7 +73,7 @@ app.post('/', upload.single('file'), function createRestaurant(req, res, next){
                         return hash;
                     });
                 });
-            })
+            });
     } else {
         storePicPromise = Promise.resolve();
     }
@@ -91,27 +91,27 @@ app.post('/', upload.single('file'), function createRestaurant(req, res, next){
                 res.send({
                     id: result.id,
                     profilePic: image || null,
-                })
-            })
+                });
+            });
         })
         .catch((err) => {
             console.log('Error creating new restaurant: ', err);
-        })
+        });
 });
 
 /**
- * @api {put} /restaurants/:id Update a restaurant given unique restaurant id 
+ * @api {put} /restaurants/:id Update a restaurant given unique restaurant id
  * @apiName: updateRestaurant
  * @apiDescription: Update a restaurant
  * @apiGroup Restaurants
- * 
+ *
  * @apiParam (Request body) {File} file File to upload using HTML forms.
  * @apiParam (Request body) {String} name Restaurant name.
  * @apiParam (Request body) {String} address Restaurant address.
  * @apiParam (Request body) {String} region Region the restaurant belongs to.
- * 
+ *
  * @apiSuccessExample {json} Success response: object with the IDs of the created restaurant and profile picture
- * 
+ *
  * @apiError (errorGroup) 400 Bad Request: field(s) missing.
  * @apiError (errorGroup) 415 Unsupported Media Type.
  * @apiError (errorGroup) 500 Internal Server Error: operation failed due to server error.
@@ -129,9 +129,9 @@ app.put('/:id', upload.single('file'), function updateRestaurant(req, res) {
     let storePicPromise;
     if (req.file) {
         // check file type
-        if(!allowedImageTypes.includes(req.file.mimetype)) {
+        if (!allowedImageTypes.includes(req.file.mimetype)) {
             res.sendStatus(415);
-            fs.unlink(req.file.path, err => {
+            fs.unlink(req.file.path, (err) => {
                 if (err) throw err;
             });
             return;
@@ -140,13 +140,13 @@ app.put('/:id', upload.single('file'), function updateRestaurant(req, res) {
             .then((hash) => {
                 // check if there exist the same file
                 return imageModel.findById(hash)
-                .then(img => {
+                .then((img) => {
                     if (!img) {
-                        fs.rename(req.file.path, req.file.destination + "/" + hash, err => {
+                        fs.rename(req.file.path, req.file.destination + '/' + hash, (err) => {
                             if (err) throw err;
-                        })
+                        });
                     } else {
-                        fs.unlink(req.file.path, err => {
+                        fs.unlink(req.file.path, (err) => {
                             if (err) throw err;
                         });
                     }
@@ -157,7 +157,7 @@ app.put('/:id', upload.single('file'), function updateRestaurant(req, res) {
                         return hash;
                     });
                 });
-            })
+            });
     } else {
         storePicPromise = Promise.resolve();
     }
@@ -177,11 +177,11 @@ app.put('/:id', upload.single('file'), function updateRestaurant(req, res) {
                             profilePic: image || oldRestaurant.profilePic,
                         });
                     });
-                })
+                });
         })
         .catch((err) => {
             console.log('Error updating restaurant: ', err);
         });
-})
+});
 
 module.exports = app;
