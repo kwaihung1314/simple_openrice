@@ -184,4 +184,27 @@ app.put('/:id', upload.single('file'), function updateRestaurant(req, res) {
         });
 });
 
+/**
+ * @api {get} /restaurants list all restaurant
+ * @apiName: listAllRestaurant
+ * @apiDescription: list all restaurants given the criteria
+ * @ apiGroup: Restaurants
+ *
+ * @apiParam (Query String) {String} q keywords to search for restaurant name.
+ * @apiParam (Query String) {Number} regionId filter by region.
+ * @apiParam (Query String) {Number} [limit=50] limit.
+ * @apiParam (Query String) {Number} [offset=0] number of row to skip.
+ * @apiParam (Query String) {String='name','create','update'} [order='name'] row sorting by.
+ * @apiParam (Query String) {String="true","false"} [reverse=false] Whether to sort in descending order.
+ *
+ * @apiSuccessExample {json} Success response:
+ * [
+ *  {
+ *      id: 100,
+ *      name: 'abc restaurant',
+ *      regionName: 'Mongkok',
+ *        
+ *  },
+ * ]
+ */
 module.exports = app;
