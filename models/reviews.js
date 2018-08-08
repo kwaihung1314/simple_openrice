@@ -26,7 +26,7 @@ module.exports = (sequelize, modelName) => {
         owner: {
             type: DataTypes.INTEGER,
             allowNull: false,
-        }
+        },
     });
 
     return Review;

@@ -6,6 +6,7 @@ const sequelize = require('../models');
 const restaurantModel = sequelize.model(config.modelNames.restaurant);
 const imageModel = sequelize.model(config.modelNames.image);
 const regionModel = sequelize.model(config.modelNames.region);
+const reviewModel = sequelize.model(config.modelNames.review);
 
 const hasha = require('hasha');
 
@@ -96,6 +97,7 @@ app.post('/', upload.single('file'), function createRestaurant(req, res, next) {
         })
         .catch((err) => {
             console.log('Error creating new restaurant: ', err);
+            res.sendStatus(500);
         });
 });
 
@@ -181,7 +183,187 @@ app.put('/:id', upload.single('file'), function updateRestaurant(req, res) {
         })
         .catch((err) => {
             console.log('Error updating restaurant: ', err);
+            res.sendStatus(500);
         });
 });
 
+/**
+ * @api {delete} /restaurant/:id Delete a restaurant with the given ID
+ * @apiName: deleteRestaurant
+ * @apiDescription: Delete a restaurant
+ * @apiGroup: Restaurants
+ *
+ * @apiParam (URL Parameter) {Number} id Restaurant unique ID.
+ *
+ * @apiError (errorGroup) 400 Bad Resquest Invalid restaurant ID.
+ * @apiError (errorGroup) 500 Internal Server Error: request failed due to server error.
+ */
+app.delete('/:id', function deleteRestaurant(req, res) {
+    restaurantModel.findById(req.params.id)
+        .then((restaurant) => {
+            if (!restaurant) {
+                res.sendStatus(400);
+                return;
+            }
+            restaurant.destroy();
+            res.sendStatus(200);
+        })
+        .catch((err) => {
+            console.log('Error deleting restaurant: ', err);
+            res.sendStatus(500);
+        });
+});
+
+/**
+ * @api {get} /restaurants list all restaurant
+ * @apiName: listAllRestaurant
+ * @apiDescription: list all restaurants given the criteria
+ * @ apiGroup: Restaurants
+ *
+ * @apiParam (Query String) {String} q keywords to search for restaurant name.
+ * @apiParam (Query String) {Number} regionId filter by region.
+ * @apiParam (Query String) {Number} [limit=50] limit.
+ * @apiParam (Query String) {Number} [offset=0] number of row to skip.
+ * @apiParam (Query String) {String='name','create','update'} [order='name'] row sorting by.
+ * @apiParam (Query String) {String="true","false"} [reverse=false] Whether to sort in descending order.
+ *
+ * @apiSuccessExample {json} Success response:
+ * [
+ *  {
+ *      id: 100,
+ *      name: 'abc restaurant',
+ *      regionName: 'Mongkok',
+ *      goodFace: 10,
+ *      badFace: 1
+ *  },
+ * ]
+ */
+
+app.get('/', function listAllRestaurant(req, res) {
+    let sortColOpt = {
+        name: 'name',
+        create: 'createdAt',
+        update: 'updatedAt',
+    };
+    let sortCol = 'name';
+    let sortDir = 'ASC';
+    if (req.query.order in sortColOpt) {
+        sortCol = sortColOpt[req.query.order];
+    }
+    if (req.query.reverse === 'true') {
+        sortDir = 'DESC';
+    }
+    let whereCondition = {};
+    let keywordCondition = [];
+    if (req.query.q) {
+        let keywords = req.query.q.trim().split(' ');
+        keywords.forEach((keyword) => {
+            keywordCondition.push({name: {[sequelize.Op.regexp]: keyword}});
+        });
+        Object.assign(whereCondition, {
+            [sequelize.Op.and]: keywordCondition,
+        });
+    }
+    if (req.query.regionId) {
+        Object.assign(whereCondition, {
+            regionId: parseInt(req.query.regionId),
+        });
+    }
+
+    restaurantModel.findAll({
+        attributes: [
+            'id',
+            'name',
+            [sequelize.literal('(SELECT COUNT(`Reviews`.`id`) FROM `Reviews` WHERE `Reviews`.`category` = 1 AND `Reviews`.`restaurantId` = `Restaurant`.`id`)'), 'goodFace'],
+            [sequelize.literal('(SELECT COUNT(`Reviews`.`id`) FROM `Reviews` WHERE `Reviews`.`category` = -1 AND `Reviews`.`restaurantId` = `Restaurant`.`id`)'), 'badFace'],
+        ],
+        include: [
+            {
+                model: regionModel,
+                attributes: ['name'],
+            },
+        ],
+        where: whereCondition,
+        limit: req.query.limit || 50,
+        offset: req.query.offset || 0,
+        order: [[sortCol, sortDir]],
+    })
+    .then((result) => {
+        res.send(result);
+    })
+    .catch((err) => {
+        console.log('Error recheiving restaurants', err);
+        res.sendStatus(500);
+    });
+});
+
+/**
+ * @api {get} /restaurants/:id list restaurant given unique restaurant id
+ * @apiName: listRestaurant
+ * @apiDescription: list a restaurant given the restaurant unique id
+ * @apiGroup: Restaurants
+ *
+ * @apiParam (url parameter) {Number} restaurant id
+ *
+ * @apiSuccessExample {json} Success response:
+ *  {
+ *      id: 100,
+ *      name: 'abc restaurant',
+ *      regionName: 'Mongkok',
+ *      goodFace: 10,
+ *      badFace: 1,
+ *      reviews: [
+ *          {
+ *              id: 10,
+ *              title: 'this is good',
+ *              category: '1'
+ *          }, ...
+ *      ],
+ *      images: [
+ *          {
+ *              id: 'hdskfnkmcdoe23'
+ *          }, ...
+ *      ]
+ *  }
+ * @apiError (errorGroup) 404 Not found: Invalid restaurant ID.
+ * @apiError (errorGroup) 500 Internal Server Error: request failed due to server error.
+ */
+
+ app.get('/:id', function listRestaurant(req, res) {
+    restaurantModel.findById(req.params.id, {
+        attributes: [
+            'id',
+            'name',
+            'address',
+            'profilePic',
+            [sequelize.literal('(SELECT COUNT(`Reviews`.`id`) FROM `Reviews` WHERE `Reviews`.`category` = 1 AND `Reviews`.`restaurantId` = `Restaurant`.`id`)'), 'goodFace'],
+            [sequelize.literal('(SELECT COUNT(`Reviews`.`id`) FROM `Reviews` WHERE `Reviews`.`category` = -1 AND `Reviews`.`restaurantId` = `Restaurant`.`id`)'), 'badFace'],
+        ],
+        include: [
+            {
+                model: regionModel,
+                attributes: ['name'],
+            },
+            {
+                model: reviewModel,
+                attributes: ['id', 'title', 'category'],
+            },
+            {
+                model: imageModel,
+                attributes: ['id'],
+            },
+        ],
+    })
+    .then((result) => {
+        if (!result) {
+            res.sendStatus(404);
+        } else {
+            res.send(result);
+        }
+    })
+    .catch((err) => {
+        console.log(err);
+        res.sendStatus(500);
+    });
+ });
 module.exports = app;

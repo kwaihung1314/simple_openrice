@@ -11,13 +11,13 @@ const sequelize = new Sequelize(
             max: 5,
             min: 0,
             acquire: 30000,
-            idle: 10000
+            idle: 10000,
         },
         logging: process.env.NODE_ENV === 'production' ? false : console.log,
-    },
+    }
 );
 
-//define models
+// define models
 require('./restaurants')(sequelize, config.modelNames.restaurant);
 require('./regions')(sequelize, config.modelNames.region);
 require('./reviews')(sequelize, config.modelNames.review);
@@ -25,7 +25,7 @@ require('./images')(sequelize, config.modelNames.image);
 require('./comments')(sequelize, config.modelNames.comment);
 require('./users')(sequelize, config.modelNames.user);
 
-//references
+// references
 require('./references/restaurants')(sequelize, config.modelNames);
 require('./references/regions')(sequelize, config.modelNames);
 require('./references/reviews')(sequelize, config.modelNames);
