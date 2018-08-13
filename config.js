@@ -13,4 +13,5 @@ module.exports = {
         user: 'User',
         comment: 'Comment',
     },
+    jwtSecret: 'thisIsTheSecret',
 };
