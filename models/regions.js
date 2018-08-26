@@ -6,7 +6,7 @@ module.exports = (sequelize, modelName) => {
             type: DataTypes.INTEGER,
             primaryKey: true,
             allowNull: false,
-            autoIncrement: true, 
+            autoIncrement: true,
         },
         name: {
             type: DataTypes.STRING,
@@ -16,3 +16,5 @@ module.exports = (sequelize, modelName) => {
 
     return Region;
 };
+
+// add all regions

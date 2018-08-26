@@ -274,6 +274,7 @@ app.get('/', function listAllRestaurant(req, res) {
         attributes: [
             'id',
             'name',
+            // TODO: profile pic
             [sequelize.literal('(SELECT COUNT(`Reviews`.`id`) FROM `Reviews` WHERE `Reviews`.`category` = 1 AND `Reviews`.`restaurantId` = `Restaurant`.`id`)'), 'goodFace'],
             [sequelize.literal('(SELECT COUNT(`Reviews`.`id`) FROM `Reviews` WHERE `Reviews`.`category` = -1 AND `Reviews`.`restaurantId` = `Restaurant`.`id`)'), 'badFace'],
         ],
