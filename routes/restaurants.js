@@ -2,7 +2,6 @@ const app = require('express').Router();
 const config = require('../config');
 const fs = require('fs');
 
-const sequelize = require('../models');
 const restaurantModel = sequelize.model(config.modelNames.restaurant);
 const imageModel = sequelize.model(config.modelNames.image);
 const regionModel = sequelize.model(config.modelNames.region);

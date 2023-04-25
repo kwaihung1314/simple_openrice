@@ -1,5 +1,4 @@
 const app = require('express').Router();
-const sequelize = require('../models');
 const config = require('../config');
 
 const reviewModel = sequelize.model(config.modelNames.review);

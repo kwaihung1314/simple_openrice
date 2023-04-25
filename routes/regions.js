@@ -1,6 +1,5 @@
 const app = require('express').Router();
 const config = require('../config');
-const sequelize = require('../models');
 const regionModel = sequelize.model(config.modelNames.region);
 
 // get all region
