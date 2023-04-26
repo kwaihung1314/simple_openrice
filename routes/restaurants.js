@@ -17,17 +17,21 @@ const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
 /**
  * @api {post} /restaurants
- * @apiName: createRestaurant
- * @apiDescription: post a new restaurant
+ * @apiName createRestaurant
+ * @apiDescription post a new restaurant
  * @apiGroup Restaurants
  *
- * @apiParam (Request body) {File} file File to upload using HTML forms.
  * @apiParam (Request body) {String} name Restaurant name.
  * @apiParam (Request body) {String} address Restaurant address.
  * @apiParam (Request body) {String} region Region the restaurant belongs to.
+ * @apiParam (Request body) {File} file File to upload using HTML forms.
  *
  * @apiSuccessExample {json} Success response: object with the IDs of the created restaurant and profile picture
- *
+ * {
+ *      "id": 4,
+ *      "profilePic": "9a3efb551a0f96665da886b1280c2567"
+ * }
+ * 
  * @apiError (errorGroup) 400 Bad Request: field(s) missing.
  * @apiError (errorGroup) 415 Unsupported Media Type.
  * @apiError (errorGroup) 500 Internal Server Error: operation failed due to server error.
@@ -102,8 +106,8 @@ app.post('/', upload.single('file'), function createRestaurant(req, res, next) {
 
 /**
  * @api {put} /restaurants/:id Update a restaurant given unique restaurant id
- * @apiName: updateRestaurant
- * @apiDescription: Update a restaurant
+ * @apiName updateRestaurant
+ * @apiDescription Update a restaurant
  * @apiGroup Restaurants
  *
  * @apiParam (Request body) {File} file File to upload using HTML forms.
@@ -112,6 +116,10 @@ app.post('/', upload.single('file'), function createRestaurant(req, res, next) {
  * @apiParam (Request body) {String} region Region the restaurant belongs to.
  *
  * @apiSuccessExample {json} Success response: object with the IDs of the created restaurant and profile picture
+ * {
+ *      "id": 4,
+ *      "profilePic": "9a3efb551a0f96665da886b1280c2567"
+ * }
  *
  * @apiError (errorGroup) 400 Bad Request: field(s) missing.
  * @apiError (errorGroup) 415 Unsupported Media Type.
@@ -188,9 +196,9 @@ app.put('/:id', upload.single('file'), function updateRestaurant(req, res) {
 
 /**
  * @api {delete} /restaurant/:id Delete a restaurant with the given ID
- * @apiName: deleteRestaurant
- * @apiDescription: Delete a restaurant
- * @apiGroup: Restaurants
+ * @apiName deleteRestaurant
+ * @apiDescription Delete a restaurant
+ * @apiGroup Restaurants
  *
  * @apiParam (URL Parameter) {Number} id Restaurant unique ID.
  *
@@ -215,9 +223,9 @@ app.delete('/:id', function deleteRestaurant(req, res) {
 
 /**
  * @api {get} /restaurants list all restaurant
- * @apiName: listAllRestaurant
- * @apiDescription: list all restaurants given the criteria
- * @ apiGroup: Restaurants
+ * @apiName listAllRestaurant
+ * @apiDescription list all restaurants given the criteria
+ * @apiGroup Restaurants
  *
  * @apiParam (Query String) {String} q keywords to search for restaurant name.
  * @apiParam (Query String) {Number} regionId filter by region.
@@ -229,12 +237,23 @@ app.delete('/:id', function deleteRestaurant(req, res) {
  * @apiSuccessExample {json} Success response:
  * [
  *  {
- *      id: 100,
- *      name: 'abc restaurant',
- *      regionName: 'Mongkok',
- *      goodFace: 10,
- *      badFace: 1
+ *      "id": 1,
+ *      "name": "some name",
+ *      "goodFace": 0,
+ *      "badFace": 0,
+ *      "Region": {
+ *          "name": "Hong Kong Islands"
+ *      }
  *  },
+ *  {
+ *      "id": 2,
+ *      "name": "some name 1",
+ *      "goodFace": 0,
+ *      "badFace": 0,
+ *      "Region": {
+ *          "name": "Hong Kong Islands"
+ *      }
+ *  }
  * ]
  */
 
@@ -299,9 +318,9 @@ app.get('/', function listAllRestaurant(req, res) {
 
 /**
  * @api {get} /restaurants/:id list restaurant given unique restaurant id
- * @apiName: listRestaurant
- * @apiDescription: list a restaurant given the restaurant unique id
- * @apiGroup: Restaurants
+ * @apiName listRestaurant
+ * @apiDescription list a restaurant given the restaurant unique id
+ * @apiGroup Restaurants
  *
  * @apiParam (url parameter) {Number} restaurant id
  *
@@ -310,6 +329,7 @@ app.get('/', function listAllRestaurant(req, res) {
  *      id: 100,
  *      name: 'abc restaurant',
  *      regionName: 'Mongkok',
+ *      profilePic: "9a3efb551a0f96665da886b1280c2567",
  *      goodFace: 10,
  *      badFace: 1,
  *      reviews: [

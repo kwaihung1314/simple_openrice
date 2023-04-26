@@ -15,6 +15,22 @@ const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
 
 // upload an image
 // TODO: add owner
+
+/**
+ * @api {post} /image
+ * @apiName createImage
+ * @apiDescription post a new image
+ * @apiGroup Image
+ *
+ * @apiParam (Request body) {File} file File to upload using HTML forms.
+ * @apiSuccessExample {json} Success response:
+ * {
+ *      "id": "9a3efb551a0f96665da886b1280c2567"
+ * }
+ *
+ * @apiError (errorGroup) 415 Unsupported Media Type.
+ * @apiError (errorGroup) 500 Internal Server Error: operation failed due to server error.
+ */
 app.post('/', upload.single('file'), (req, res) => {
   if (!req.file) {
     res.sendStatus(400);
@@ -61,6 +77,29 @@ app.post('/', upload.single('file'), (req, res) => {
 // get all images of a review, given a review unique id
 // ordered by updatedAt
 // offset[0], limit[50]
+
+/**
+ * @api {get} /image list all images with given criteria
+ * @apiName listAllImage
+ * @apiDescription list all images given the criteria
+ * @apiGroup Image
+ *
+ * @apiParam (Query String) {String} restaurantId restaurant id to search for a restaurant's image.
+ * @apiParam (Query String) {String} reviewId review id to search for a review's image.
+ * @apiParam (Query String) {Number} [limit=50] limit.
+ * @apiParam (Query String) {Number} [offset=0] number of row to skip.
+ *
+ * @apiSuccessExample {json} Success response:
+ * [
+ *  {
+ *      id: 100,
+ *      name: 'abc restaurant',
+ *      regionName: 'Mongkok',
+ *      goodFace: 10,
+ *      badFace: 1
+ *  },
+ * ]
+ */
 
 app.get('/', (req, res) => {
   let whereCondition = {};

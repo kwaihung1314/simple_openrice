@@ -7,6 +7,25 @@ const userValidation = require('../policies/user/validation');
 const userModel = sequelize.model(config.modelNames.user);
 
 // user registration
+
+/**
+ * @api {post} /users/register
+ * @apiName createUser
+ * @apiDescription post a new user to register an account
+ * @apiGroup User
+ *
+ * @apiParam (Request body) {String} username user name.
+ * @apiParam (Request body) {String} email user email address.
+ * @apiParam (Request body) {String} password user password.
+ *
+ * @apiSuccessExample {json} Success response:
+ * {
+ *    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoidXNlcjEyMyIsImVtYWlsIjoidXNlcjFAZW1haWwuY29tIiwiaWF0IjoxNjgyNDY1NTI3fQ.3Xigm-iD2uq3bUGc2unokc1GuKrMdJwNbtBwDm-Tu6o"
+ * }
+ *
+ * @apiError (errorGroup) 400 Bad Request: field(s) missing.
+ * @apiError (errorGroup) 500 Internal Server Error: operation failed due to server error.
+ */
 app.post('/register', userValidation, (req, res) => {
   bcrypt.hash(req.body.password, 10)
     .then((hashPassword) => {
@@ -39,6 +58,24 @@ app.post('/register', userValidation, (req, res) => {
 });
 
 // user login
+
+/**
+ * @api {post} /users/login
+ * @apiName authUser
+ * @apiDescription post user login info to autheticate
+ * @apiGroup User
+ *
+ * @apiParam (Request body) {String} username user name.
+ * @apiParam (Request body) {String} password user password.
+ *
+ * @apiSuccessExample {json} Success response:
+ * {
+ *    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInVzZXJuYW1lIjoidXNlcjEyMyIsImVtYWlsIjoidXNlcjFAZW1haWwuY29tIiwiaWF0IjoxNjgyNDY1NTI3fQ.3Xigm-iD2uq3bUGc2unokc1GuKrMdJwNbtBwDm-Tu6o"
+ * }
+ *
+ * @apiError (errorGroup) 401 Unauthorized: incorrect login info.
+ * @apiError (errorGroup) 500 Internal Server Error: operation failed due to server error.
+ */
 app.post('/login', (req, res) => {
   userModel.findOne({
     where: {
