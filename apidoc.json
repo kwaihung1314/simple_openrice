@@ -1,0 +1,7 @@
+{
+    "name": "Simple Openrice REST API",
+    "version": "0.1.0",
+    "description": "The backend API for a restaurant review application",
+    "title": "Simple Openrice REST API",
+    "url" : "http://localhost:3000"
+  }
